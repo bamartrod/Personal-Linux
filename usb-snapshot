@@ -1,0 +1,15 @@
+#!/bin/bash
+PC_ID=$(blkid -o value -s UUID /dev/sde2 | cut -c1-8)
+SNAPSHOT="/mnt/usb-persist/snapshots/${PC_ID}/$(date +%Y%m&d_%H%M)" 
+mkdir -p "$SNAPSHOT"
+echo Iniciando snapshot para $PC_ID en "$SNAPSHOT"
+rsync -aAXv / "$SNAPSHOT" \
+	--exclude=/proc \
+	--exclude=/sys \
+	--exclude=/dev \
+	--exclude=/run \
+	--exclude=/tmp \
+	--exclude=/mnt \
+	--exclude=/lost+found
+echo "Snapshot completado en $SNAPSHOT"
+

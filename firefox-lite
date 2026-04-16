@@ -1,0 +1,29 @@
+#!/bin/bash
+PROFILE_DIR="/mnt/usb-persist/persist/profile/firefox"
+CACHE_DIR="/mnt/usb-persist/persist/cache/firefox"
+
+mkdir -p "$PROFILE_DIR" "$CACHE_DIR"
+
+# Crear user.js con optimizaciones extremas de RAM
+cat <<EOF > "$PROFILE_DIR/user.js"
+user_pref("dom.ipc.processCount", 1); // LIMITAR A 1 SOLO PROCESO DE CONTENIDO (Ahorro masivo de RAM)
+user_pref("browser.cache.memory.capacity", 51200); // Limitar cache en RAM a 50MB
+user_pref("browser.sessionhistory.max_entries", 5); // Menos historial de "atrás/adelante"
+user_pref("extensions.pocket.enabled", false); // Desactivar Pocket
+user_pref("reader.parse-on-load.enabled", false); // Desactivar modo lectura automático
+user_pref("browser.tabs.remote.autostart", true);
+user_pref("toolkit.cosmeticAnimations.enabled", false); // Sin animaciones visuales
+user_pref("browser.display.show_image_placeholders", false);
+user_pref("layers.acceleration.force-enabled", true); // Forzar GPU para liberar CPU
+user_pref("webgl.disabled", true); // Desactivar 3D si no es necesario
+user_pref("browser.sessionstore.interval", 60000); // Guardar sesion cada 60s en lugar de 15s
+EOF
+
+# Variables de entorno para rendimiento
+export MOZ_DISABLE_RDD_SANDBOX=1 # Ahorra un proceso de sandbox
+export MOZ_X11_EGL=1            # Mejora renderizado en X11
+
+exec firefox \
+        --profile "$PROFILE_DIR" \
+        --no-remote \
+        "\$@"
